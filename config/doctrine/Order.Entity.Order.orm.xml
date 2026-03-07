@@ -12,7 +12,7 @@
         <field name="adjustmentsTotal" type="integer"/>
         <field name="total" type="integer"/>
 
-        <one-to-many field="items" target-entity="App\Component\OrderItem\Entity\OrderItem" mapped-by="order"
+        <one-to-many field="items" target-entity="App\Component\Order\Entity\OrderItem" mapped-by="order"
                      orphan-removal="true">
             <cascade>
                 <cascade-all/>
@@ -25,5 +25,9 @@
                 <cascade-persist/>
             </cascade>
         </many-to-one>
+
+        <field name="createdAt" type="datetime_immutable" nullable="true"/>
+        <field name="updatedAt" type="datetime_immutable" nullable="true"/>
+        <field name="status" type="string" enum-type="App\Component\Order\ValueObject\OrderStatus"/>
     </entity>
 </doctrine-mapping>
