@@ -35,9 +35,7 @@ class AddProductToCartHandler
         }
 
         $cart = $this->cartProvider->getOrCreateCartForUser($user);
-
         $cart->addProduct($product, Quantity::fromInt($cmd->quantity));
-
         $this->em->flush();
 
         return $cart;

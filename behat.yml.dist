@@ -3,6 +3,9 @@ default:
         default:
             contexts:
                 - App\Tests\Behat\ProductContext
+                - App\Tests\Behat\OrderContext
+                - App\Tests\Behat\ApiContext
+                - App\Tests\Behat\UserContext
 
     extensions:
         DAMA\DoctrineTestBundle\Behat\ServiceContainer\DoctrineExtension: ~
