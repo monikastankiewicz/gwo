@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Component\Product\Entity;
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 class Product
 {
     public const TYPE_BOOK = 'book';
     public const TYPE_AUDIO = 'audio';
     public const TYPE_COURSE = 'course';
 
+    #[Groups(['order:read'])]
     protected int $id;
     protected string $code;
+    #[Groups(['order:read'])]
     protected string $name;
     protected string $type;
+    #[Groups(['order:read'])]
     protected int $price;
     /** null means that product is tax-free  */
     protected ?int $taxRate;
