@@ -4,29 +4,57 @@ declare(strict_types=1);
 
 namespace App\Component\Order\Entity;
 
-use App\Component\OrderItem\Entity\OrderItem;
+use App\Component\Order\Exception\CartDistinctProductsLimitExceeded;
+use App\Component\Order\ValueObject\OrderStatus;
+use App\Component\Order\ValueObject\Quantity;
+use App\Component\Product\Entity\Product;
+use App\Component\Resource\Model\TimestampedTrait;
 use App\Component\User\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class Order
 {
+    use TimestampedTrait;
+
+    public const MAX_DISTINCT_PRODUCTS = 5;
+
+    #[Groups(['order:read'])]
     protected int $id;
+
+    #[Groups(['order:read'])]
+    protected OrderStatus $status;
+
     protected User $user;
+
+    #[Groups(['order:read'])]
     protected int $itemsTotal = 0;
+
+    #[Groups(['order:read'])]
     protected int $adjustmentsTotal = 0;
-    /**
-     * Items total + adjustments total.
-     */
+
+    /** Items total + adjustments total. */
+    #[Groups(['order:read'])]
     protected int $total = 0;
-    /**
-     * @var Collection<array-key, OrderItem>
-     */
+
+    /** @var Collection<array-key, OrderItem> */
+    #[Groups(['order:read'])]
     protected Collection $items;
 
     public function __construct()
     {
         $this->items = new ArrayCollection();
+        $this->status = OrderStatus::CART;
+    }
+
+    public static function createCartForUser(User $user): self
+    {
+        $order = new self();
+        $order->setUser($user);
+        $order->setStatus(OrderStatus::CART);
+
+        return $order;
     }
 
     public function getId(): int
@@ -69,9 +97,7 @@ class Order
         $this->total = $total;
     }
 
-    /**
-     * @return Collection<array-key, OrderItem>
-     */
+    /** @return Collection<array-key, OrderItem> */
     public function getItems(): Collection
     {
         return $this->items;
@@ -113,9 +139,7 @@ class Order
         return $this->items->contains($item);
     }
 
-    /**
-     * Items total + Adjustments total.
-     */
+    /** Items total + Adjustments total. */
     protected function recalculateTotal(): void
     {
         $this->total = $this->itemsTotal + $this->adjustmentsTotal;
@@ -133,5 +157,50 @@ class Order
         }
 
         $this->recalculateTotal();
+    }
+
+    public function getStatus(): OrderStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(OrderStatus $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function addProduct(Product $product, Quantity $quantityToAdd): void
+    {
+        $existingItem = $this->findItemForProduct($product);
+
+        if ($existingItem !== null) {
+            $existingItem->increaseQuantity($quantityToAdd);
+            $this->recalculateItemsTotal();
+
+            return;
+        }
+
+        $this->assertDistinctProductsLimitNotExceeded();
+
+        $this->addItem(OrderItem::createForProduct($product, $quantityToAdd));
+    }
+
+    /** Finds an existing order item for the given product. */
+    private function findItemForProduct(Product $product): ?OrderItem
+    {
+        foreach ($this->items as $item) {
+            if ($item->matchesProduct($product)) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
+    private function assertDistinctProductsLimitNotExceeded(): void
+    {
+        if ($this->items->count() >= self::MAX_DISTINCT_PRODUCTS) {
+            throw new CartDistinctProductsLimitExceeded(self::MAX_DISTINCT_PRODUCTS);
+        }
     }
 }
