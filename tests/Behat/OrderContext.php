@@ -49,9 +49,13 @@ class OrderContext implements Context
     /**
      * @When /^user "([^"]+)" adds product "([^"]+)" to the cart$/
      */
-    public function userAddsProductToCart(string $userId, string $productId, PyStringNode $body): void
+    public function userAddsProductToCart(string $userId, string $productId): void
     {
-        $payload = json_decode($body->getRaw(), true);
+        $payload = [
+            'userId' => $this->userContext->getUser($userId)->getId(),
+            'productId' => $this->productContext->getProduct($productId)->getId(),
+            'quantity' => 1,
+        ];
 
         $this->handleJsonRequest(
             '/api/v1/cart/items',
@@ -63,10 +67,10 @@ class OrderContext implements Context
     /**
      * @When /^user "([^"]*)" adds product "([^"]*)" to the cart twice$/
      */
-    public function userAddsProductToTheCartTwice(string $userId, string $productId, PyStringNode $body): void
+    public function userAddsProductToTheCartTwice(string $userId, string $productId): void
     {
         for ($i = 0; $i < 2; $i++) {
-            $this->userAddsProductToCart($userId, $productId, $body);
+            $this->userAddsProductToCart($userId, $productId);
         }
     }
 
@@ -75,7 +79,8 @@ class OrderContext implements Context
      */
     public function thereExistsACartForUserWithItems(string $userId, TableNode $table): void
     {
-        $user = $this->getUserOrFail($userId);
+        $user = $this->userContext->getUser($userId);
+
         $order = Order::createCartForUser($user);
 
         foreach ($table as $row) {
@@ -162,7 +167,7 @@ class OrderContext implements Context
      */
     public function thereExistsACartWithIdForUserContainingItems(string $cartId, string $userId, TableNode $table): void
     {
-        $user = $this->getUserOrFail($userId);
+        $user = $this->userContext->getUser($userId);
 
         $order = Order::createCartForUser($user);
         $this->orders[$cartId] = $order;
@@ -193,17 +198,6 @@ class OrderContext implements Context
         }
 
         return $order;
-    }
-
-    private function getUserOrFail(string $userId): User
-    {
-        $user = $this->userContext->getUser($userId);
-
-        if ($user === null) {
-            throw new \RuntimeException(sprintf('User "%s" not found.', $userId));
-        }
-
-        return $user;
     }
 
     private function getProductOrFail(string $productId): Product

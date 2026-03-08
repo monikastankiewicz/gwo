@@ -11,13 +11,6 @@ Feature: Add products to cart
       | id | code | name       | type | price | taxRate |
       | 1  | P001 | Product 1  | book | 1000  | 23      |
     When user "1" adds product "1" to the cart
-        """
-        {
-            "userId": 1,
-            "productId": 1,
-            "quantity": 1
-        }
-        """
     Then the response should be received with status code 200
     And the response should equal json:
         """
@@ -51,13 +44,6 @@ Feature: Add products to cart
       | id | code | name       | type | price | taxRate |
       | 2  | P002 | Product 2  | book | 2000  | 23      |
     When user "2" adds product "2" to the cart twice
-        """
-        {
-            "userId": 2,
-            "productId": 2,
-            "quantity": 1
-        }
-        """
     Then the response should be received with status code 200
     And the response should equal json:
         """

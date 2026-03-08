@@ -6,15 +6,15 @@ Feature: Calculate cart totals with promotions
   Scenario: User cart includes item and order promotions
     Given there exist following users:
       | id | name      |
-      | 5  | Test User |
+      | 10  | Test User |
     And there exist following products:
       | id | code | name      | type  | price | taxRate |
-      | 7  | P001 | Product 1 | book  | 1000  | 23      |
-      | 8  | P002 | Product 2 | audio | 500   | 23      |
-    And there exists a cart with id "4" for user "5" containing items:
+      | 20  | P001 | Product 1 | book  | 1000  | 23      |
+      | 21  | P002 | Product 2 | audio | 500   | 23      |
+    And there exists a cart with id "4" for user "10" containing items:
       | id | productId | quantity |
-      | 1  | 7         | 1        |
-      | 2  | 8         | 1        |
+      | 1  | 20         | 1        |
+      | 2  | 21         | 1        |
     And there exist following promotions:
       | id | type  | percentageDiscount | productTypesFilter |
       | 1  | item  | 10                 | book               |

@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 final class UserContext implements Context
 {
     /** @var array<string, User> */
-    protected array $users = [];
+    public array $users = [];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
