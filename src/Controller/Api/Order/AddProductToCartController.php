@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class AddProductToCartController extends AbstractController
 {
-    #[Route('/orders/cart/items', methods: ['POST'])]
+    #[Route('/orders/cart/items', name: 'api_cart_add_product', methods: ['POST'])]
     #[OA\Tag(name: 'Cart')]
     #[OA\RequestBody(
         required: true,
@@ -43,6 +43,21 @@ final class AddProductToCartController extends AbstractController
                     property: 'message',
                     type: 'string',
                     example: 'Cart cannot contain more than 10 different products.'
+                ),
+            ],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: Response::HTTP_NOT_FOUND,
+        description: 'Order or promotion not found',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'code', type: 'integer', example: 404),
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Order not found.'
                 ),
             ],
             type: 'object'
