@@ -24,8 +24,6 @@ class OrderRepository extends ServiceEntityRepository
 
         if ($order->isNew()) {
             $entityManager->persist($order);
-        } else {
-            $order->markUpdated();
         }
 
         $entityManager->flush();

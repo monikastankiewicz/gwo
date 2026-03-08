@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Component\Order\Entity;
 
 use App\Component\Order\Exception\CartDistinctProductsLimitExceeded;
+use App\Component\Order\Exception\OrderPromotionAlreadyApplied;
 use App\Component\Order\ValueObject\OrderStatus;
 use App\Component\Order\ValueObject\Quantity;
 use App\Component\Product\Entity\Product;
+use App\Component\Promotion\Entity\Promotion;
+use App\Component\Resource\Model\Timestamped;
 use App\Component\Resource\Model\TimestampedTrait;
 use App\Component\User\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class Order
+class Order implements Timestamped
 {
     use TimestampedTrait;
 
@@ -42,9 +45,13 @@ class Order
     #[Groups(['order:read'])]
     protected Collection $items;
 
+    /** @var Collection<array-key, OrderPromotion> */
+    protected Collection $orderPromotions;
+
     public function __construct()
     {
         $this->items = new ArrayCollection();
+        $this->orderPromotions = new ArrayCollection();
         $this->status = OrderStatus::CART;
     }
 
@@ -201,6 +208,39 @@ class Order
     {
         if ($this->items->count() >= self::MAX_DISTINCT_PRODUCTS) {
             throw new CartDistinctProductsLimitExceeded(self::MAX_DISTINCT_PRODUCTS);
+        }
+    }
+
+    /** @return Collection<array-key, OrderPromotion> */
+    public function getOrderPromotions(): Collection
+    {
+        return $this->orderPromotions;
+    }
+
+    public function addPromotion(Promotion $promotion): void
+    {
+        if ($this->orderPromotions->contains($promotion)) {
+            return;
+        }
+
+        $this->assertItemPromotionCanBeApplied($promotion);
+
+        $this->getOrderPromotions()->add(OrderPromotion::create($this, $promotion));
+        $this->recalculateItemsTotal();
+    }
+
+    private function assertItemPromotionCanBeApplied(Promotion $promotion): void
+    {
+        // Prevent adding the same promotion to the order more than once
+        if ($promotion->getType() !== Promotion::TYPE_ORDER) {
+            return;
+        }
+
+        // Only one order-type promotion (TYPE_ORDER) can be applied to an order
+        foreach ($this->getOrderPromotions() as $orderPromotion) {
+            if ($orderPromotion->getPromotion()->getType() === Promotion::TYPE_ORDER) {
+                throw new OrderPromotionAlreadyApplied();
+            }
         }
     }
 }
