@@ -9,6 +9,6 @@ nelmio_api_doc:
             - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
     models:
         names:
-            - { alias: OrderItemDetailsView, type: App\Service\Order\View\OrderItemDetailsView }
-            - { alias: OrderDetailsView, type: App\Service\Order\View\OrderDetailsView }
+            - { alias: CartItemDetailsView, type: App\Service\Order\View\CartItemDetailsView }
+            - { alias: CartDetailsView, type: App\Service\Order\View\CartDetailsView }
             - { alias: ProductDetailsView, type: App\Service\Order\View\ProductDetailsView }

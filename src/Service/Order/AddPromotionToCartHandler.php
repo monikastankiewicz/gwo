@@ -19,9 +19,9 @@ class AddPromotionToCartHandler
     ) {
     }
 
-    public function handle(int $orderId, AddPromotionToCart $cmd): Order
+    public function handle(int $cartId, AddPromotionToCart $cmd): Order
     {
-        $cart = $this->doctrine->getRepository(Order::class)->find($orderId);
+        $cart = $this->doctrine->getRepository(Order::class)->find($cartId);
         if (!$cart instanceof Order) {
             throw new OrderNotFound();
         }

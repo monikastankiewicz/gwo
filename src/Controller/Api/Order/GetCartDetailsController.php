@@ -4,31 +4,39 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\Order;
 
-use App\Service\Order\GetOrderDetailsHandler;
-use App\Service\Order\View\OrderDetailsView;
+use App\Component\Order\ValueObject\Currency;
+use App\Service\Order\GetCartDetailsHandler;
+use App\Service\Order\View\CartDetailsView;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class GetOrderDetailsController extends AbstractController
+class GetCartDetailsController extends AbstractController
 {
-    #[Route('/orders/{orderId}', name: 'api_order_details', methods: ['GET'])]
-    #[OA\Tag(name: 'Order')]
+    #[Route('/cart/{cartId}', name: 'api_order_details', methods: ['GET'])]
+    #[OA\Tag(name: 'Cart')]
     #[OA\Parameter(
-        name: 'orderId',
+        name: 'cartId',
         in: 'path',
         required: true,
         schema: new OA\Schema(type: 'integer', example: 1)
+    )]
+    #[OA\Parameter(
+        name: 'currency',
+        in: 'query',
+        required: false,
+        schema: new OA\Schema(type: 'string', default: 'PLN', enum: ['PLN', 'EUR'])
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'Order details',
         content: new OA\JsonContent(
-            ref: new Model(type: OrderDetailsView::class)
+            ref: new Model(type: CartDetailsView::class)
         )
     )]
     #[OA\Response(
@@ -43,13 +51,14 @@ final class GetOrderDetailsController extends AbstractController
         )
     )]
     public function __invoke(
-        int $orderId,
-        GetOrderDetailsHandler $handler,
-        SerializerInterface $serializer,
+        int                   $cartId,
+        Request               $request,
+        GetCartDetailsHandler $handler,
+        SerializerInterface   $serializer,
     ): JsonResponse {
-        $view = $handler->handle($orderId);
-
-        $data = $serializer->serialize($view, 'json');
+        $currency = Currency::fromNullable($request->query->get('currency'));
+        $command = $handler->handle($cartId, $currency);
+        $data = $serializer->serialize($command, 'json');
 
         return new JsonResponse($data, Response::HTTP_OK, [], true);
     }

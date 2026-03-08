@@ -54,7 +54,7 @@ class OrderContext implements Context
         $payload = json_decode($body->getRaw(), true);
 
         $this->handleJsonRequest(
-            '/api/v1/orders/cart/items',
+            '/api/v1/cart/items',
             Request::METHOD_POST,
             $payload
         );
@@ -153,7 +153,7 @@ class OrderContext implements Context
         $order = $this->getOrderOrFail($cartId);
 
         $this->handleRequest(
-            Request::create(sprintf('/api/v1/orders/%s', $order->getId()))
+            Request::create(sprintf('/api/v1/cart/%s', $order->getId()))
         );
     }
 

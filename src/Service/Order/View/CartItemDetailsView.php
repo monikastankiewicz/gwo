@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Service\Order\View;
 
 use App\Component\Order\Entity\OrderItem;
-use App\Component\Order\Model\OrderItemPricingData;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'OrderItemDetailsView',
+    schema: 'CartItemDetailsView',
     required: [
         'id',
         'product',
@@ -21,7 +20,7 @@ use OpenApi\Attributes as OA;
         'total',
     ]
 )]
-final class OrderItemDetailsView
+final class CartItemDetailsView
 {
     public function __construct(
         #[OA\Property(type: 'integer', example: 1)]
@@ -90,21 +89,27 @@ final class OrderItemDetailsView
     ) {
     }
 
-
-    public static function fromOrderItem(OrderItem $item, OrderItemPricingData $pricing): self
-    {
+    public static function fromOrderItem(
+        OrderItem $item,
+        int $unitPrice,
+        ?int $discount,
+        int $discountValue,
+        int $distributedOrderDiscountValue,
+        int $discountedUnitPrice,
+        int $total,
+        ?int $taxValue,
+    ): self {
         return new self(
             id: $item->getId(),
             product: ProductDetailsView::fromProduct($item->getProduct()),
-            unitPrice: $item->getUnitPrice(),
-            discount: $pricing->discount,
-            discountValue: $pricing->discountValue,
-            distributedOrderDiscountValue: $pricing->distributedOrderDiscountValue,
-            discountedUnitPrice: $pricing->discountedUnitPrice,
+            unitPrice: $unitPrice,
+            discount: $discount,
+            discountValue: $discountValue,
+            distributedOrderDiscountValue: $distributedOrderDiscountValue,
+            discountedUnitPrice: $discountedUnitPrice,
             quantity: $item->getQuantity(),
-            total: $pricing->total,
-            taxValue: $pricing->taxValue,
-
+            total: $total,
+            taxValue: $taxValue,
         );
     }
 }

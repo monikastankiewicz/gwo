@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class AddProductToCartController extends AbstractController
 {
-    #[Route('/orders/cart/items', name: 'api_cart_add_product', methods: ['POST'])]
+    #[Route('/cart/items', name: 'api_cart_add_product', methods: ['POST'])]
     #[OA\Tag(name: 'Cart')]
     #[OA\RequestBody(
         required: true,
