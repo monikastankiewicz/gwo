@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Webmozart\Assert\Assert;
 
-final class ProductContext implements Context
+class ProductContext implements Context
 {
     /** @var array<string, Product> */
     protected array $products = [];
