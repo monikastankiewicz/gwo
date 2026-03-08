@@ -18,10 +18,10 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class AddPromotionToCartController extends AbstractController
 {
-    #[Route('/orders/{orderId}/promotions', name: 'api_cart_add_promotion', methods: ['POST'])]
+    #[Route('/cart/{cartId}/promotions', name: 'api_cart_add_promotion', methods: ['POST'])]
     #[OA\Tag(name: 'Cart')]
     #[OA\Parameter(
-        name: 'orderId',
+        name: 'cartId',
         in: 'path',
         required: true,
         schema: new OA\Schema(type: 'integer', example: 1)
@@ -54,7 +54,22 @@ final class AddPromotionToCartController extends AbstractController
             type: 'object'
         )
     )]
-    public function __invoke(Request $request, int $orderId, AddPromotionToCartHandler $handler, SerializerInterface $serializer): JsonResponse
+    #[OA\Response(
+        response: Response::HTTP_NOT_FOUND,
+        description: 'Cart or promotion not found',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'code', type: 'integer', example: 404),
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Cart not found.'
+                ),
+            ],
+            type: 'object'
+        )
+    )]
+    public function __invoke(Request $request, int $cartId, AddPromotionToCartHandler $handler, SerializerInterface $serializer): JsonResponse
     {
         $command = $serializer->deserialize(
             $request->getContent(),
@@ -62,7 +77,7 @@ final class AddPromotionToCartController extends AbstractController
             'json'
         );
 
-        $order = $handler->handle($orderId, $command);
+        $order = $handler->handle($cartId, $command);
 
         $data = $serializer->serialize(
             $order,

@@ -7,10 +7,10 @@ namespace App\Service\Order\View;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'OrderDetailsView',
+    schema: 'CartDetailsView',
     required: ['id', 'itemsTotal', 'adjustmentsTotal', 'total', 'items']
 )]
-class OrderDetailsView
+class CartDetailsView
 {
     public function __construct(
         #[OA\Property(type: 'integer', example: 123)]
@@ -47,7 +47,7 @@ class OrderDetailsView
 
         #[OA\Property(
             type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/OrderItemDetailsView')
+            items: new OA\Items(ref: '#/components/schemas/CartItemDetailsView')
         )]
         public array $items,
     ) {
