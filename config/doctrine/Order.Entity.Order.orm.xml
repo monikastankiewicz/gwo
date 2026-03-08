@@ -29,5 +29,14 @@
         <field name="createdAt" type="datetime_immutable" nullable="true"/>
         <field name="updatedAt" type="datetime_immutable" nullable="true"/>
         <field name="status" type="string" enum-type="App\Component\Order\ValueObject\OrderStatus"/>
+
+        <one-to-many field="orderPromotions"
+                     target-entity="App\Component\Order\Entity\OrderPromotion"
+                     mapped-by="order"
+                     orphan-removal="true">
+            <cascade>
+                <cascade-persist/>
+            </cascade>
+        </one-to-many>
     </entity>
 </doctrine-mapping>

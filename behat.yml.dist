@@ -6,6 +6,7 @@ default:
                 - App\Tests\Behat\OrderContext
                 - App\Tests\Behat\ApiContext
                 - App\Tests\Behat\UserContext
+                - App\Tests\Behat\PromotionContext
 
     extensions:
         DAMA\DoctrineTestBundle\Behat\ServiceContainer\DoctrineExtension: ~

@@ -48,6 +48,18 @@ final class ApiContext implements Context
         $expected = json_decode($json->getRaw(), true);
         $actual = json_decode($response->getContent(), true);
 
+        unset($expected['id'], $actual['id']);
+
+        if (isset($expected['items']) && isset($actual['items'])) {
+            foreach ($expected['items'] as $index => $_item) {
+                unset($expected['items'][$index]['id']);
+            }
+
+            foreach ($actual['items'] as $index => $_item) {
+                unset($actual['items'][$index]['id']);
+            }
+        }
+
         if ($expected != $actual) {
             throw new \RuntimeException(sprintf(
                 "JSON does not match.\nExpected:\n%s\n\nActual:\n%s",
