@@ -9,6 +9,10 @@ use App\Component\Order\Service\MoneyConverter;
 use App\Component\Order\Service\OrderItemPricingCalculator;
 use App\Component\Order\ValueObject\Currency;
 
+/**
+ * Creates a view model representing cart details with calculated prices,
+ * applied discounts, taxes and currency conversion.
+ */
 final class CartDetailsViewFactory
 {
     public function __construct(

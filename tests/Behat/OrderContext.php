@@ -9,12 +9,9 @@ use App\Component\Order\Entity\OrderItem;
 use App\Component\Order\Entity\OrderPromotion;
 use App\Component\Order\ValueObject\OrderStatus;
 use App\Component\Order\ValueObject\Quantity;
-use App\Component\Product\Entity\Product;
-use App\Component\Promotion\Entity\Promotion;
 use App\Component\User\Entity\User;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +25,7 @@ class OrderContext implements Context
 
     private ProductContext $productContext;
     private UserContext $userContext;
+    private PromotionContext $promotionContext;
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -44,6 +42,7 @@ class OrderContext implements Context
         $environment = $scope->getEnvironment();
         $this->productContext = $environment->getContext(ProductContext::class);
         $this->userContext = $environment->getContext(UserContext::class);
+        $this->promotionContext = $environment->getContext(PromotionContext::class);
     }
 
     /**
@@ -84,7 +83,7 @@ class OrderContext implements Context
         $order = Order::createCartForUser($user);
 
         foreach ($table as $row) {
-            $product = $this->getProductOrFail($row['productId']);
+            $product = $this->productContext->getProduct($row['productId']);
             $order->addProduct($product, Quantity::fromInt((int) $row['quantity']));
         }
 
@@ -99,10 +98,12 @@ class OrderContext implements Context
         string $userId,
         int $expectedQuantity
     ): void {
-        $order = $this->getCartForUserOrFail($userId);
+        $user = $this->userContext->getUser($userId);
+        $product = $this->productContext->getProduct($productId);
+        $order = $this->getCartForUserOrFail($user);
 
         foreach ($order->getItems() as $item) {
-            if ($item->getProduct()?->getId() === (int) $productId) {
+            if ($item->getProduct()?->getId() === (int) $product->getId()) {
                 if ($item->getQuantity() === $expectedQuantity) {
                     return;
                 }
@@ -123,7 +124,8 @@ class OrderContext implements Context
      */
     public function theUserCartShouldStillContainDistinctProducts(string $userId, int $expectedCount): void
     {
-        $order = $this->getCartForUserOrFail($userId);
+        $user = $this->userContext->getUser($userId);
+        $order = $this->getCartForUserOrFail($user);
         $actualCount = $order->getItems()->count();
 
         if ($actualCount !== $expectedCount) {
@@ -140,10 +142,10 @@ class OrderContext implements Context
      */
     public function cartHasFollowingPromotionsAssigned(string $orderId, TableNode $table): void
     {
-        $order = $this->getOrderOrFail($orderId);
+        $order = $this->getOrder($orderId);
 
         foreach ($table as $row) {
-            $promotion = $this->getPromotionOrFail($row['promotionId']);
+            $promotion = $this->promotionContext->getPromotion($row['promotionId']);
             $order->getOrderPromotions()->add(OrderPromotion::create($order, $promotion));
         }
 
@@ -155,7 +157,7 @@ class OrderContext implements Context
      */
     public function userOpensPreviewOfCart(string $cartId): void
     {
-        $order = $this->getOrderOrFail($cartId);
+        $order = $this->getOrder($cartId);
 
         $this->handleRequest(
             Request::create(sprintf('/api/v1/cart/%s', $order->getId()))
@@ -174,7 +176,7 @@ class OrderContext implements Context
         $this->em->persist($order);
 
         foreach ($table as $row) {
-            $product = $this->getProductOrFail($row['productId']);
+            $product = $this->productContext->getProduct($row['productId']);
 
             $item = OrderItem::createForProduct($product, Quantity::fromInt((int) $row['quantity']));
             $order->addItem($item);
@@ -184,52 +186,35 @@ class OrderContext implements Context
         $this->em->flush();
     }
 
-    public function getOrder(string $id): ?Order
+    /**
+     * @When /^user "([^"]*)" adds promotion "([^"]*)" to the cart "([^"]*)"$/
+     */
+    public function userAddsPromotionToTheCart(string $userId, string $promotionId, string $cartId): void
     {
-        return $this->orders[$id] ?? null;
-    }
-
-    private function getOrderOrFail(string $orderId): Order
-    {
-        $order = $this->getOrder($orderId);
-
-        if ($order === null) {
-            throw new \RuntimeException(sprintf('Order "%s" not found.', $orderId));
-        }
-
-        return $order;
-    }
-
-    private function getProductOrFail(string $productId): Product
-    {
-        $product = $this->productContext->getProduct($productId);
-
-        if ($product === null) {
-            throw new \RuntimeException(sprintf('Product "%s" not found.', $productId));
-        }
-
-        return $product;
-    }
-
-    private function getPromotionOrFail(string $promotionId): Promotion
-    {
-        $promotion = $this->em->getRepository(Promotion::class)->find((int) $promotionId);
-
-        if ($promotion === null) {
-            throw new \RuntimeException(sprintf('Promotion "%s" not found.', $promotionId));
-        }
-
-        return $promotion;
-    }
-
-    private function getCartForUserOrFail(string $userId): Order
-    {
-        $user = $this->em->getRepository(User::class)->find((int) $userId);
+        $user = $this->userContext->getUser($userId);
 
         if ($user === null) {
             throw new \RuntimeException(sprintf('User "%s" not found.', $userId));
         }
 
+        $promotion = $this->promotionContext->getPromotion($promotionId);
+
+        $payload = [
+            'userId' => $user->getId(),
+            'promotionId' => $promotion->getId(),
+        ];
+
+        $card = $this->getOrder($cartId);
+
+        $this->handleJsonRequest(
+            sprintf('/api/v1/cart/%s/promotions', $card->getId()),
+            Request::METHOD_POST,
+            $payload
+        );
+    }
+
+    private function getCartForUserOrFail(User $user): Order
+    {
         $order = $this->em->getRepository(Order::class)->findOneBy([
             'user' => $user,
             'status' => OrderStatus::CART,
@@ -269,5 +254,10 @@ class OrderContext implements Context
     {
         $this->em->persist($entity);
         $this->em->flush();
+    }
+
+    private function getOrder(string $id): ?Order
+    {
+        return $this->orders[$id] ?? null;
     }
 }

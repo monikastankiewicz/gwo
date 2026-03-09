@@ -53,10 +53,12 @@ final class ApiContext implements Context
         if (isset($expected['items']) && isset($actual['items'])) {
             foreach ($expected['items'] as $index => $_item) {
                 unset($expected['items'][$index]['id']);
+                unset($expected['items'][$index]['product']['id']);
             }
 
             foreach ($actual['items'] as $index => $_item) {
                 unset($actual['items'][$index]['id']);
+                unset($actual['items'][$index]['product']['id']);
             }
         }
 

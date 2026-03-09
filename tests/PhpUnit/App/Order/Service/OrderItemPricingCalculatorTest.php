@@ -61,20 +61,20 @@ final class OrderItemPricingCalculatorTest extends TestCase
         $audioResult = $this->calculator->calculate($audioItem, $order);
 
         // BOOK: 1000 - 10% = 900
-        self::assertSame(10, $bookResult->discount);
-        self::assertSame(100, $bookResult->discountValue);
-        self::assertSame(0, $bookResult->distributedOrderDiscountValue);
-        self::assertSame(900, $bookResult->discountedUnitPrice);
-        self::assertSame(900, $bookResult->total);
-        self::assertSame(207, $bookResult->taxValue);
+        $this->assertSame(10, $bookResult->discount);
+        $this->assertSame(100, $bookResult->discountValue);
+        $this->assertSame(0, $bookResult->distributedOrderDiscountValue);
+        $this->assertSame(900, $bookResult->discountedUnitPrice);
+        $this->assertSame(900, $bookResult->total);
+        $this->assertSame(207, $bookResult->taxValue);
 
         // AUDIO: no item promotion -> stays 500
-        self::assertNull($audioResult->discount);
-        self::assertSame(0, $audioResult->discountValue);
-        self::assertSame(0, $audioResult->distributedOrderDiscountValue);
-        self::assertSame(500, $audioResult->discountedUnitPrice);
-        self::assertSame(500, $audioResult->total);
-        self::assertSame(115, $audioResult->taxValue);
+        $this->assertNull($audioResult->discount);
+        $this->assertSame(0, $audioResult->discountValue);
+        $this->assertSame(0, $audioResult->distributedOrderDiscountValue);
+        $this->assertSame(500, $audioResult->discountedUnitPrice);
+        $this->assertSame(500, $audioResult->total);
+        $this->assertSame(115, $audioResult->taxValue);
     }
 
     public function test_calculates_two_products_with_two_item_promotions_for_different_product_types(): void
@@ -122,20 +122,20 @@ final class OrderItemPricingCalculatorTest extends TestCase
         $audioResult = $this->calculator->calculate($audioItem, $order);
 
         // BOOK: 1000 - 10% = 900
-        self::assertSame(10, $bookResult->discount);
-        self::assertSame(100, $bookResult->discountValue);
-        self::assertSame(0, $bookResult->distributedOrderDiscountValue);
-        self::assertSame(900, $bookResult->discountedUnitPrice);
-        self::assertSame(900, $bookResult->total);
-        self::assertSame(207, $bookResult->taxValue);
+        $this->assertSame(10, $bookResult->discount);
+        $this->assertSame(100, $bookResult->discountValue);
+        $this->assertSame(0, $bookResult->distributedOrderDiscountValue);
+        $this->assertSame(900, $bookResult->discountedUnitPrice);
+        $this->assertSame(900, $bookResult->total);
+        $this->assertSame(207, $bookResult->taxValue);
 
         // AUDIO: 500 - 20% = 400
-        self::assertSame(20, $audioResult->discount);
-        self::assertSame(100, $audioResult->discountValue);
-        self::assertSame(0, $audioResult->distributedOrderDiscountValue);
-        self::assertSame(400, $audioResult->discountedUnitPrice);
-        self::assertSame(400, $audioResult->total);
-        self::assertSame(92, $audioResult->taxValue);
+        $this->assertSame(20, $audioResult->discount);
+        $this->assertSame(100, $audioResult->discountValue);
+        $this->assertSame(0, $audioResult->distributedOrderDiscountValue);
+        $this->assertSame(400, $audioResult->discountedUnitPrice);
+        $this->assertSame(400, $audioResult->total);
+        $this->assertSame(92, $audioResult->taxValue);
     }
 
     public function test_calculates_two_products_with_order_promotion(): void
@@ -177,20 +177,20 @@ final class OrderItemPricingCalculatorTest extends TestCase
         // Order discount = 20% of 1500 = 300
 
         // BOOK share: 1000 / 1500 * 300 = 200 -> 1000 - 200 = 800
-        self::assertNull($bookResult->discount);
-        self::assertSame(0, $bookResult->discountValue);
-        self::assertSame(200, $bookResult->distributedOrderDiscountValue);
-        self::assertSame(800, $bookResult->discountedUnitPrice);
-        self::assertSame(800, $bookResult->total);
-        self::assertSame(184, $bookResult->taxValue);
+        $this->assertNull($bookResult->discount);
+        $this->assertSame(0, $bookResult->discountValue);
+        $this->assertSame(200, $bookResult->distributedOrderDiscountValue);
+        $this->assertSame(800, $bookResult->discountedUnitPrice);
+        $this->assertSame(800, $bookResult->total);
+        $this->assertSame(184, $bookResult->taxValue);
 
         // AUDIO share: 500 / 1500 * 300 = 100 -> 500 - 100 = 400
-        self::assertNull($audioResult->discount);
-        self::assertSame(0, $audioResult->discountValue);
-        self::assertSame(100, $audioResult->distributedOrderDiscountValue);
-        self::assertSame(400, $audioResult->discountedUnitPrice);
-        self::assertSame(400, $audioResult->total);
-        self::assertSame(92, $audioResult->taxValue);
+        $this->assertNull($audioResult->discount);
+        $this->assertSame(0, $audioResult->discountValue);
+        $this->assertSame(100, $audioResult->distributedOrderDiscountValue);
+        $this->assertSame(400, $audioResult->discountedUnitPrice);
+        $this->assertSame(400, $audioResult->total);
+        $this->assertSame(92, $audioResult->taxValue);
     }
 
     public function test_calculates_three_products_with_item_and_order_promotions(): void
@@ -254,28 +254,28 @@ final class OrderItemPricingCalculatorTest extends TestCase
         // order discount = 320
 
         // First book: 320 * 900 / 1600 = 180 -> 900 - 180 = 720
-        self::assertSame(10, $firstBookResult->discount);
-        self::assertSame(100, $firstBookResult->discountValue);
-        self::assertSame(180, $firstBookResult->distributedOrderDiscountValue);
-        self::assertSame(720, $firstBookResult->discountedUnitPrice);
-        self::assertSame(720, $firstBookResult->total);
-        self::assertSame(165, $firstBookResult->taxValue);
+        $this->assertSame(10, $firstBookResult->discount);
+        $this->assertSame(100, $firstBookResult->discountValue);
+        $this->assertSame(180, $firstBookResult->distributedOrderDiscountValue);
+        $this->assertSame(720, $firstBookResult->discountedUnitPrice);
+        $this->assertSame(720, $firstBookResult->total);
+        $this->assertSame(165, $firstBookResult->taxValue);
 
         // Second book: 320 * 450 / 1600 = 90 -> 450 - 90 = 360
-        self::assertSame(10, $secondBookResult->discount);
-        self::assertSame(50, $secondBookResult->discountValue);
-        self::assertSame(90, $secondBookResult->distributedOrderDiscountValue);
-        self::assertSame(360, $secondBookResult->discountedUnitPrice);
-        self::assertSame(360, $secondBookResult->total);
-        self::assertSame(82, $secondBookResult->taxValue);
+        $this->assertSame(10, $secondBookResult->discount);
+        $this->assertSame(50, $secondBookResult->discountValue);
+        $this->assertSame(90, $secondBookResult->distributedOrderDiscountValue);
+        $this->assertSame(360, $secondBookResult->discountedUnitPrice);
+        $this->assertSame(360, $secondBookResult->total);
+        $this->assertSame(82, $secondBookResult->taxValue);
 
         // AUDIO: 320 * 250 / 1600 = 50 -> 250 - 50 = 200
-        self::assertNull($audioResult->discount);
-        self::assertSame(0, $audioResult->discountValue);
-        self::assertSame(50, $audioResult->distributedOrderDiscountValue);
-        self::assertSame(200, $audioResult->discountedUnitPrice);
-        self::assertSame(200, $audioResult->total);
-        self::assertSame(46, $audioResult->taxValue);
+        $this->assertNull($audioResult->discount);
+        $this->assertSame(0, $audioResult->discountValue);
+        $this->assertSame(50, $audioResult->distributedOrderDiscountValue);
+        $this->assertSame(200, $audioResult->discountedUnitPrice);
+        $this->assertSame(200, $audioResult->total);
+        $this->assertSame(46, $audioResult->taxValue);
     }
 
     private function createOrder(): Order

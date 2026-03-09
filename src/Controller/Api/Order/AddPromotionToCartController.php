@@ -77,14 +77,8 @@ final class AddPromotionToCartController extends AbstractController
             'json'
         );
 
-        $order = $handler->handle($cartId, $command);
+        $handler->handle($cartId, $command);
 
-        $data = $serializer->serialize(
-            $order,
-            'json',
-            ['groups' => ['order:read']]
-        );
-
-        return new JsonResponse($data, 200, [], true);
+        return new JsonResponse(['message' => 'Promotion assigned to cart successfully.'], Response::HTTP_OK);
     }
 }
