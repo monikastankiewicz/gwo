@@ -20,6 +20,10 @@ class GetCartDetailsController extends AbstractController
 {
     #[Route('/cart/{cartId}', name: 'api_order_details', methods: ['GET'])]
     #[OA\Tag(name: 'Cart')]
+    #[OA\Get(
+        description: 'Returns detailed cart information including item prices, applied promotions, taxes and totals. Supports optional currency conversion (PLN or EUR).',
+        summary: 'Get cart details'
+    )]
     #[OA\Parameter(
         name: 'cartId',
         in: 'path',

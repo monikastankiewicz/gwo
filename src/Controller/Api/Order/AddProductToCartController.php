@@ -20,6 +20,10 @@ final class AddProductToCartController extends AbstractController
 {
     #[Route('/cart/items', name: 'api_cart_add_product', methods: ['POST'])]
     #[OA\Tag(name: 'Cart')]
+    #[OA\Post(
+        description: 'Adds a product to the cart or increases its quantity if the product is already present.',
+        summary: 'Add product to cart'
+    )]
     #[OA\RequestBody(
         required: true,
         content: new OA\JsonContent(

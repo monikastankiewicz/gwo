@@ -20,6 +20,10 @@ final class AddPromotionToCartController extends AbstractController
 {
     #[Route('/cart/{cartId}/promotions', name: 'api_cart_add_promotion', methods: ['POST'])]
     #[OA\Tag(name: 'Cart')]
+    #[OA\Post(
+        description: 'Assigns a promotion to the selected cart.',
+        summary: 'Assign promotion to cart'
+    )]
     #[OA\Parameter(
         name: 'cartId',
         in: 'path',
