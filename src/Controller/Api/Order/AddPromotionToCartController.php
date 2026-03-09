@@ -38,9 +38,16 @@ final class AddPromotionToCartController extends AbstractController
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
-        description: 'Promotion added to order successfully',
+        description: 'Promotion assigned to cart successfully',
         content: new OA\JsonContent(
-            ref: new Model(type: Order::class, groups: ['order:read'])
+            properties: [
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Promotion assigned to cart successfully.'
+                ),
+            ],
+            type: 'object'
         )
     )]
     #[OA\Response(
